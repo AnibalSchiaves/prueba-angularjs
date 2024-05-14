@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html ng-app="appModule">
+    <head>
+        <title>App básica para explicar conceptos</title>
+        <meta charset="utf-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+        <script src="person-list/person-list.component.js"></script>
+        <script src="app.js"></script>
+        
+    </head>
+    <body ng-controller="CtrlPrincipal">
+        {{mensaje}}
+        <br>
+        <saludo></saludo>
+        <person-list></person-list>
+    </body>
+</html>

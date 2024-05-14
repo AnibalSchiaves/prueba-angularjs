@@ -1,0 +1,17 @@
+<div>
+    <h3>Lista de Personas</h3>
+    <div>
+        <input ng-model="$ctrl.query" type="text" placeholder="buscar...">
+        <select ng-model="$ctrl.sort">
+            <option value="toString()">Ascendente</option>
+            <option value="-toString()">Descendente</option>
+        </select>
+        <ul>
+            <li ng-repeat="person in $ctrl.personas | filter:$ctrl.query | orderBy:$ctrl.sort">
+                <h4>
+                    <img ng-src="{{$ctrl.formatAsImg(person)}}" height="40px"/> {{person}}
+                </h4>
+            </li>
+        </ul>
+    </div>
+</div>

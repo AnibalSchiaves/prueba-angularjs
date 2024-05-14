@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html ng-app="app">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="components.js"></script>
+    <script src="app.js"></script>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css">
+    </head>
+    <body>
+        <tabs style="padding:1em">
+            <pane title="Localization">
+                <span>{{'2024-03-16' | date:'fullDate'}}</span>
+                <br>
+                <span>{{10280 | currency}}</span>
+                <br>
+                <span>{{1230568.567 | number}}</span>
+            </pane>
+            <pane title="Pluralization">
+                <div ng-controller="BeerController">
+                    <div ng-repeat="beer in beers">
+                        <ng-pluralize count="beer" when="beersForm"></ng-pluralize>
+                    </div>
+                </div>
+                
+            </pane>
+        </tabs>
+    </body>
+</html>

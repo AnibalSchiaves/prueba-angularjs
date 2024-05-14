@@ -1,0 +1,14 @@
+En este ejemplo se usa:
+
+-atributo ng-app: para linquear con el modulo de la aplicación
+-atributo ng-controller: para linquear a un controller de la aplicacion
+-uso de {{propiedad}}: para recuperar una propiedad del scope del controller
+-funcion directive(name, function): para crear directivas propias
+-directiva ng-pluralize: directiva de angular para pluralizar
+-atributo ng-repeat: para hacer repeticiones del html
+-funcion module(name, [modulos-que-incluye]): funcion para crear un modulo de angular
+-funcion controller(name, funcion): funcion para crear un controller en un modulo de angular
+-pipes currency, date y number: para aplicar formatos a los datos mostrados en el html
+-atributo ng-class: para aplicar clases en forma condicional a alguna propiedad
+-atributo ng-transclude: para indicar el lugar donde hay que inyectar el html que encierra
+-atributo ng-click: para asociar una funcion al evento click del control

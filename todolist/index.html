@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html ng-app="todoApp">
+    <head>
+        <title>Todo List con Angular JS</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+        <script src="app.js"></script>
+    </head>
+    <body>
+        <div ng-controller="TodoListController as todoList">
+            <h1>{{todoList.title}}</h1>
+            <p>{{todoList.pendientes()}} de {{todoList.todos.length}} pendientes <a ng-click="todoList.archivar()" href="#">[ archivar ]</a></p>
+            <ul style="list-style: none;margin:0;padding:0">
+                <li ng-repeat="todo in todoList.todos">
+                    <input type="checkbox" ng-model="todo.done"><span>{{todo.text}}</span>
+                </li>
+            </ul>
+            <br/>
+            <form ng-submit="todoList.addTodo()">
+                <input type="text" ng-model="todoList.todoText">
+                <input type="submit" value="Agregar">
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,136 @@
+
+https://docs.angularjs.org/tutorial
+-----------------------------------
+
+NOTA: LO EXPLICADO ACÁ SE CORRESPONDE CON LO HECHO EN /home/anibal/vs-workspace/prueba-angularjs
+
+modules: 
+	angular core
+	ngRoute
+
+- ng-app -> para marcar el elemento raiz del html donde empezará a funcionar nuestra aplicación de angularjs.
+
+- {{expression}} -> se denomina binding y se utiliza para indicar a angularjs que debe reeplazar dicho contenido por el resultado de la expresión, la cual será evaluada en el contexto del alcance del modelo actual (current model scope). Además si hay cambios en el valor de la expresión angularjs se ocupara de actualizar el dom con dichos cambios.
+
+- ng-app="nombreModuloPrincipal" -> acá usamos la directiva ng-app para marcar el elemento raiz y además indicar cual es el modulo principal de la aplicación
+
+- declarar un modulo -> si queremos declarar el módulo 'appModule' entonces agregamos el javascript
+	var appModule = angular.module("appModule", []);
+
+- controller: es el elemento de angularjs que actua de contexto para el cual el binding será evaluado y también nos prové de la lógica y comportamiento asociado a nuestra vista o template.
+
+- declarar un controller -> si por ejemplo queremos declarar un controlador CtrlPrincipal entonces agregamos el js
+	appModule.controller('CtrlController', function CtrlPrincipal($scope) {
+		...
+		$scope.mensaje = "Un mensaje de ejemplo";
+		...
+	});	
+
+- ng-controller="CtrlPrincipal" -> con la directiva ngController podemos marcar el tag a partir del cual entrará en juego el controlador CtrlPrincipal y con el todo el modelo de datos que contiene. En este caso podriamos, dentro del contexto de CtrlPrincipal utilizar la expresión {{mensaje}} para mostrar el texto que contiene la variable del modelo definida como 'mensaje'.
+
+- component: es el elemento en angularjs que nos permite juntar un templete y un controller para formar un componente reutilizable y que puede ser añadido a otras vistas mediante el tag que le asignemos al mismo. Un elemento similar pero más avanzado son las directivas.
+
+- declarar un component -> si por ejemplo queremos declarar el componente saludo en el modulo appModulo agregamos el js:
+	appModulo.component('saludo', {
+		template: 'Hola {{$ctrl.user}}!!}}
+		controller: Saludo() {
+			this.user = 'Mundo';
+		}
+	});
+
+- para convertir la aplicación para que sea una aplicación de node se debe:
+	- ejecutamos: 
+		- npm init (confirmamos las opciones por defecto)
+		- npm install angular@1.8
+		- npm install --save-dev http-server
+		- npm install --save-dev cpx
+	- creamos la carpeta lib
+	- agregamos lo siguientes líneas a la sección de script de package.json:
+		- "copy-libs": "cpx \"node_modules/{angular,angular-*}/**/*\" lib -C"
+		- "postinstall": "npm run copy-libs"
+		- "prestart": "npm install"
+		- "start": "http-server . -a localhost -p 8000 -c-1"
+
+- declarar un component con modulo propio -> si queremos declarar un componente en un modulo propio lo que vamos a hacer es crear una carpeta para el componente, en nuestro ejemplo person-list
+Allí creamos el archivo person-list.component.js con el siguiente código:
+	angular.module('personListModule', []);
+	angular.module('personListModule')
+		.component('personList', {
+			templateUrl: 'person-list/person-list.template.html',
+			controller: function PersonListController() {
+					this.personas = [
+						"Anibal Schiaves",
+						"Ana María Cavallo",
+						"Darío Pedonesi"
+					];
+			}
+		});
+También creamos el template (person-list.template.html) para dicho componente dentro de la carpeta indicada:
+	<div>
+    	<h3>Lista de Personas</h3>
+		<div>--aquí va la lista de personas--</div>
+    <div>
+Por el momento está incompleto el template. Finalmente tenemos que agregar el modulo personListModule como dependencia de nuestro modulo principal, para ello modificamos la declaración del modulo appModule en app.js de la siguiente manera:
+	var appModule = angular.module('appModule', ['personListModule']);
+Un detalle importante es que en el archivo index.html tenemos que agregar el script de nuestro nuevo modulo previo al script del modulo principal:
+	...
+	<script src="person-list/person-list.component.js"></script>
+    <script src="app.js"></script>
+	...
+
+- ng-repeat -> es la directiva de angularjs que se utiliza para hacer repetitivo un determinado fragmento del html. Supongamos que queremos repetir el elemento <li> dentro de una lista <ul> para mostrar nombres de personas, entonces agregamos el siguiente html:
+	<ul>
+		<li ng-repeat="persona in $ctrl.personas">
+			{{persona}}
+		</li>
+	</ul>
+	donde en el controller debemos tener un array de nombres de personas (variable personas)
+
+- ng-model -> con esta directiva podemos hacer lo que se denomina data-binding, es decir asociar el valor de un determinada control en el template a una propiedad del controller. Por ejemplo podemos asociar un input con una propiedad del scope del controller que se llame query agregando el siguiente html
+	<input type="text" ng-model="$ctrl.query">
+luego, podemos utilizar dicha propiedad como filtro para la expresión que usamos en el ng-repeat y que dicho filtro se ejecute instantaneamente al cambiar el valor de la propiedad, ejemplo:
+	<li ng-repeat="persona in personas | filter:$ctrl.query>
+
+- filter -> función que se utiliza para filtrar un array mediante el valor de una expresión, en el ejemplo anterior utilizamos filter para filtrar un array de nombres de personas por aquellos que contengan un determinado texto (ingresado previamente en un input)
+
+- orderBy -> función se utiliza para ordernar un array de objetos por alguno de sus atributos o, si es un array de primitivos, ordenarlos por sus valores. Por ejemplo podemos definir una nueva propiedad en el controller y unirla mediante databind a un control select de la siguiente manera:
+	<select ng-model="$ctrl.sort">
+		<option value="toString()">Ascendente</option>
+		<option value="-toString()">Descendente</option>
+	</select>
+Luego en la directiva ng-repeat podemos usar la funcion orderBy para ordenar por dicha propiedad:
+	<li ng-repeat="persona in personas | filter:$ctrl.query | orderBy:$ctrl.sort>
+Un dato importante es que tenemos que darle un valor por defecto a la propiedad sort en el controller, para que de esta forma el select se muestre preseteado con alguno de sus opciones y que pueda aplicarse un ordenamiento inicial, ejemplo:
+	this.sort = "toString()";
+Si esto no se hace, angularjs por defecto agregará un valor vacío al select y el ordenamiento será el natural del array (con un array de string igualmente lo ordena alfabeticamente).
+
+- $http -> servicio nativo de angularjs para realizar peticiones ajax. Dicho servicio se injecta en el componente que necesitemos usar vía injección de dependencia, para esto tenemos que indicarlo exactamente con notación $http en el constructor de nuestro componente. En este caso vamos a utilizarlo en nuestro PersonListController, para lo cual debemos rescribir lo que indicamos en la propiedad controller (del objeto que crea nuestro componente personList) de la siguiente manera:
+	controller: ['$http', 
+		function PersonListController($http) {
+			this.personas = [];
+
+			$http.get("person-list/data.json").then((response) => {
+				this.personas = response.data;
+			});
+
+			this.sort = "toString()";
+		}
+	]
+Aquí vemos que luego se utiliza la función get del servicio para realizar la petición y asignamos la respuesta a nuestra propiedad personas. Un detalle importante es que, para evitar proplemas a la hora de minificar nuestro código y evitar que se cambie la notación $http (lo cual haría que la injección de dependencia deje de funcionar), pasamos a la popiedad controller un array, donde el primer elemento es el string '$http' y nuestro segundo elemento es la función propiamente dicha con $http en la declaración de parámetros.
+
+- ng-src -> directiva para utilizar en reemplazo del atributo estandar src y de esa forma poder hacer referencia a una expresión evaluada mediante angularjs. Vamos a agregar al template de person-list un tag img que hará referencia a la imagen de la persona, para ello modificamos el contenido del elemento li que tiene el ng-repeat por el siguiente:
+	<h4>
+		<img ng-src="{{$ctrl.formatAsImg(person)}}" height="40px"/> {{person}}
+	</h4>
+Vemos que la expresión usada es {{$ctrl.formatAsImg(person)}}, allí se invoca a una función del scope llamada formatAsImg que toma el nombre de la persona y devuelve el path a la imagen asociada.
+
+	ngView (ng-view)
+	ngSrc (ng-src)
+	ngRepeat (ng-repeat)
+services: 
+	$routeProvider
+	$routeParams
+funciones: 
+	angular.module(...).config([$provider, function($provider) {...}])
+	angular.module(...).component('name', {..., templateUrl, controller, ...})
+	angular.module(...).filter('name', function() {... return function() {}})
