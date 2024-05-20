@@ -4,10 +4,6 @@ https://docs.angularjs.org/tutorial
 
 NOTA: LO EXPLICADO ACÁ SE CORRESPONDE CON LO HECHO EN /home/anibal/vs-workspace/prueba-angularjs
 
-modules: 
-	angular core
-	ngRoute
-
 - ng-app -> para marcar el elemento raiz del html donde empezará a funcionar nuestra aplicación de angularjs.
 
 - {{expression}} -> se denomina binding y se utiliza para indicar a angularjs que debe reeplazar dicho contenido por el resultado de la expresión, la cual será evaluada en el contexto del alcance del modelo actual (current model scope). Además si hay cambios en el valor de la expresión angularjs se ocupara de actualizar el dom con dichos cambios.
@@ -124,13 +120,4 @@ Aquí vemos que luego se utiliza la función get del servicio para realizar la p
 	</h4>
 Vemos que la expresión usada es {{$ctrl.formatAsImg(person)}}, allí se invoca a una función del scope llamada formatAsImg que toma el nombre de la persona y devuelve el path a la imagen asociada.
 
-	ngView (ng-view)
-	ngSrc (ng-src)
-	ngRepeat (ng-repeat)
-services: 
-	$routeProvider
-	$routeParams
-funciones: 
-	angular.module(...).config([$provider, function($provider) {...}])
-	angular.module(...).component('name', {..., templateUrl, controller, ...})
-	angular.module(...).filter('name', function() {... return function() {}})
+------- hasta aquí incluido en commit "templating, binding, components, controllers" -------
