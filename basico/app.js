@@ -1,4 +1,4 @@
-var appModule = angular.module('appModule', ['personListModule']);
+var appModule = angular.module('appModule', ['personListModule', 'personDetailModule', 'ngRoute']);
 
 appModule.controller('CtrlPrincipal', function CtrlPrincipal($scope) {
     $scope.mensaje = "Un mensaje de ejemplo";

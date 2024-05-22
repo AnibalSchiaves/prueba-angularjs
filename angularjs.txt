@@ -121,3 +121,121 @@ Aquí vemos que luego se utiliza la función get del servicio para realizar la p
 Vemos que la expresión usada es {{$ctrl.formatAsImg(person)}}, allí se invoca a una función del scope llamada formatAsImg que toma el nombre de la persona y devuelve el path a la imagen asociada.
 
 ------- hasta aquí incluido en commit "templating, binding, components, controllers" -------
+
+- ngRoute -> módulo que nos permite definir rutas a nuestra aplicación de angularjs de manera de poder navegar por la misma. Para poder hacer uso de este modulo vamos a hacer algunas adaptaciones primero.
+Agregamos la dependencia de ng-route a nuestro package.json dado que es un módulo que no viene por defecto junto al core de angularjs:
+
+	npm install angular-route@1.8
+
+Añadimos a nuestro index.html el script del modulo (que al hacer install, npm nos lo deja disponible dentro de la carpeta lib), lo hacemos debajo del script de angular.js:
+	
+	<script src="lib/angular-route/angular-route.min.js"></script>
+
+Finalmente, indicamos que nuestro módulo tiene una dependencia con ngRoute. Esto lo hacemos en la declaración del modulo principal de nuestra aplicación, en el archivo app.js:
+	
+	var appModule = angular.module('appModule', ['personListModule', 'ngRoute']);
+
+- $routeProvider -> es el provider que nos brinda ngRoute para configurar las rutas de nuestra aplicación. Allí indicaremos que template debe responder a cada ruta de nuestra aplicación. Dicha definición la haremos en un archivo separado, al cual llamaremos app.config.js. El contenido del mismo será:
+
+	angular.module('appModule')
+		.config(['$routeProvider', function config($routeProvider) {
+			$routeProvider
+				.when('/personas', {
+					template: '<person-list></person-list>'
+				})
+				.when('/personas/:id', {
+					template: '<person-detail></person-detail>'
+				})
+				.otherwise('/personas');
+		}]);
+
+Allí definimos dos rutas, '/personas' renderizará nuestro componente person-list y '/personas/:id' nuestro componente (todavía no creado) person-detail.
+Además debemos agregar la referencia a dicho script en nuestro index.html para que pueda ejecutarse. Lo ponemos debajo de la referencia a app.js:
+
+	<script src="app.config.js"></script>
+
+Comprobaremos ahora que al levantar nuestra aplicación automáticamente nos redirije a la url 'http://localhost:7000/#!/personas', eso lo hace porque definimos la url '/personas' como la default. Además agrega #!, lo cual es la secuencia de caracteres que utiliza angularjs a partir de la cual considerará el resto como la url definida en $routeProvider.
+
+- ng-view -> es la directiva que nos provee ngRoute para indicar el elemento del html donde injectará el template que corresponda a la url actual de la aplicación. Vamos a modificar nuestro index.html para reemplazar el uso directo del componente person-list para un div con la directiva ng-view:
+
+	<div ng-view></div>
+
+Vemos que, al ejecutar la aplicación, la misma seguirá viendose igual, pero ahora la renderización de person-list se hace por la url.
+Para corrobar que el ruteo funciona vamos a crear un nuevo componente prácticamente vacío para renderizar person-detail. Creamos la carpeta person-detail y dentro de esta el archivo person-deatil.component.js con el siguiente código:
+
+	angular.module('personDetailModule', []);
+
+	angular.module('personDetailModule')
+		.component('personDetail', {
+			template: '<p>acá va el detalle de la persona</p>',
+			controller: function personDetail() {
+			}
+		});
+
+Además, en nuestro modulo principal agregamos la dependencia con el nuevo modulo creado para el componente personDetail, modificamos la declaración de appModule de la siguiente manera:
+
+	var appModule = angular.module('appModule', ['personListModule', 'personDetailModule', 'ngRoute']);
+
+También agregamos el nuevo script del módulo en nuestro index.html debajo del script de person-list:
+
+	<script src="person-detail/person-detail.component.js"></script>
+
+Finalmente, para corroborar que el ruteo se realice vamos a agregar una nueva función a controller de person-list, esto lo hacemos en person-list.component.js dentro de la función personListController:
+
+	this.formatAsId = function(nombre) {
+		return nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase();
+	}
+
+Y modificamos el template person-list.template.html para agregar un link a la ruta personas/:{id}, para ello encerramos el <h4> con un tag <a> de la siguiente manera:
+
+	<a href="#!/personas/{{$ctrl.formatAsId(person)}}">
+		<h4>
+			<img ng-src="{{$ctrl.formatAsImg(person)}}" height="40px"/> {{person}}
+		</h4>
+	</a>
+
+Vemos ahora que al hacer click en la imagen o en el nombre de la persona nos redirije a la url 'http://localhost:7000/#!/personas/{id}', renderizando nuestro nuevo componente.
+
+- $routeParams -> es el service que nos provee el módulo ngRoute para acceder a los parámetros de la url actual. Vamos a modificar el componente person-detail para hacer uso de dicho servicio y así poder obtener el id de la persona a la cual el usuario realizó click en la vista previa. Además inyectamos $http para poder hacer una request y obtener más datos de la persona. Para eso entonces creamos en la carpeta person-detail el archivo person-detail.template.html con el siguiente contenido:
+
+	<div>
+		<br>
+		<div ng-if="$ctrl.error" style="color: red;">
+			<span>{{$ctrl.error}}</span>
+		</div>
+		<div ng-if="$ctrl.persona">
+			<div>
+				<label>Nombre:</label>
+				<span>{{$ctrl.persona.nombre}}</span>
+			</div>
+			<div>
+				<label>Descripción:</label>
+				<span>{{$ctrl.persona.descripcion}}</span>
+			</div>
+		</div>
+	</div>
+
+Y modificamos person-detail.component.js de la siguiente manera:
+
+angular.module('personDetailModule', ['ngRoute']);
+
+	angular.module('personDetailModule')
+		.component('personDetail', {
+			templateUrl: '/person-detail/person-detail.template.html',
+			controller: ['$routeParams', '$http', function personDetail($routeParams, $http) {
+				let url = 'person-detail/'+$routeParams.id+'.json';
+				var ctrl = this;
+				$http.get(url)
+					.then(function(response) {
+						ctrl.persona = response.data;
+					}, function(error) {
+						console.log('Ocurrió un error al recuperar los datos de la persona: ',error);
+						ctrl.error = 'No se pudo recuperar los datos de la persona';
+					});
+
+			}]
+		});
+
+Si ahora ejecutamos la aplicación cuando hagamos click en alguna persona nos mostrará más detalles o bien un mensaje de error en caso de no poder obtener los datos de la misma.
+
+------- hasta aquí incluido en commit "ngRoute" -------

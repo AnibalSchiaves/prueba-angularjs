@@ -3,15 +3,18 @@
     <head>
         <title>App básica para explicar conceptos</title>
         <meta charset="utf-8">
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+        <script src="lib/angular/angular.min.js"></script>
+        <script src="lib/angular-route/angular-route.min.js"></script>
         <script src="person-list/person-list.component.js"></script>
+        <script src="person-detail/person-detail.component.js"></script>
         <script src="app.js"></script>
+        <script src="app.config.js"></script>
         
     </head>
     <body ng-controller="CtrlPrincipal">
         {{mensaje}}
         <br>
         <saludo></saludo>
-        <person-list></person-list>
+        <div ng-view></div>
     </body>
 </html>

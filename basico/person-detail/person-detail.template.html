@@ -1,0 +1,16 @@
+<div>
+    <br>
+    <div ng-if="$ctrl.error" style="color: red;">
+        <span>{{$ctrl.error}}</span>
+    </div>
+    <div ng-if="$ctrl.persona">
+        <div>
+            <label>Nombre:</label>
+            <span>{{$ctrl.persona.nombre}}</span>
+        </div>
+        <div>
+            <label>Descripción:</label>
+            <span>{{$ctrl.persona.descripcion}}</span>
+        </div>
+    </div>
+</div>
