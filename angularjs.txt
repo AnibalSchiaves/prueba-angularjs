@@ -239,3 +239,106 @@ angular.module('personDetailModule', ['ngRoute']);
 Si ahora ejecutamos la aplicación cuando hagamos click en alguna persona nos mostrará más detalles o bien un mensaje de error en caso de no poder obtener los datos de la misma.
 
 ------- hasta aquí incluido en commit "ngRoute" -------
+
+- declarar un service -> un service es un tipo de componente que podemos utilizar para realizar funciones específicas que pueden ser compartidas entre los distintos componenentes de nuestra aplicación angularjs. Vamos a crear un service que nos permite concentrar las funciones formatAsImg y formatAsId para que podemos compartirla entre todos los componentes que la necesiten. Para declarar un service vamos, pirmero, a declarar un nuevo módulo y luego añadir el service en dicho módulo. Creamos la carpeta person-utils y dentro de ella el archivo person-utils.service.js con el siguiente código:
+
+	angular.module('personUtils', []);
+	angular.module('personUtils')
+		.service('personUtils', function personUtils() {
+
+			this.formatAsImg = function(nombre) {
+				return "img/"+nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase()+".jpeg";
+			}
+
+			this.formatAsId = function(nombre) {
+				return nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase();
+			}
+
+			return this;
+
+		});
+
+Ahora, agregamos el script de nuestro nuevo módulo al index.html para que esté disponible para los componentes (lo hacemos antes de los script de los componenentes):
+
+	...
+	<script src="person-utils/person-utils.service.js"></script>
+	...
+
+Luego, en person-detail vamos a agregar un propiedad 'img' a nuestro objeto persona para poder renderizar la imagen, hacemos uso del nuevo service. Para ello hacemos 3 cambios:
+
+En la declaración de personDetailModule agregamos la dependencia:
+
+	angular.module('personDetailModule', ['ngRoute','personUtils']);
+
+Inyectamos el service en el controller:
+
+	...
+	controller: ['$routeParams', '$http', 'personUtils', function personDetail($routeParams, $http, personUtils) {
+	...
+
+Y agregamos el calculo de la propiedad debajo de la asignacion de response.data:
+
+	...
+	ctrl.persona.img = personUtils.formatAsImg(ctrl.persona.nombre);
+	...
+
+En person-detail.template.html agregamos el tag img para mostrar la imagen:
+
+	...
+	<img ng-src="{{$ctrl.persona.img}}" />
+	...
+
+También, vamos a reescribir person-list para que nuestro array 'personas' ahora sea un array de objetos con las propiedades nombre, id e img. Para ello vamos a tener que reescribir person-list.component.js de la siguiente manera:
+
+	angular.module('personListModule', ['personUtils']);
+	angular.module('personListModule')
+		.component('personList', {
+			templateUrl: 'person-list/person-list.template.html',
+			controller: ['$http', 'personUtils', 
+				function PersonListController($http, personUtils) {
+					this.personas = [];
+					var ctrl = this;
+					$http.get("person-list/data.json").then((response) => {
+						let personas = response.data;
+						angular.forEach(personas, function(persona, i) {
+							let personaObj = {};
+							personaObj.nombre = persona;
+							personaObj.id = personUtils.formatAsId(persona);
+							personaObj.img = personUtils.formatAsImg(persona);
+							ctrl.personas.push(personaObj);
+						})
+					});
+
+					this.sort = "nombre";
+
+					this.formatAsImg = personUtils.formatAsImg;
+
+					this.formatAsId = personUtils.formatAsId;
+				}
+			]
+		});
+
+Vemos que hacemos uso de la función angular.forEach() para iterar sobre el array de personas y reconvertirlo.
+
+Además vamos a reescribir person-list.template.html haciendo 3 cambios:
+
+Primero, nuestros tag option harán referencia a la propiedad 'nombre' para ordenar:
+
+	...
+	<option value="nombre">Ascendente</option>
+    <option value="-nombre">Descendente</option>
+	...
+
+Segundo, reescribimos el anchor donde hacemos click en la persona para usar la nueva propiedad id:
+
+	...
+	<a href="#!/personas/{{person.id}}">
+	...
+
+Tercero, reescribimos el tag 'img' para hacer uso de la nueva propiedad 'img' y tambien el binding que muestra el nombre de la persona:
+
+	...
+	<img ng-src="{{person.img}}" height="40px"/> {{person.nombre}}
+	...
+
+------- hasta aquí incluido en commit "service" -------

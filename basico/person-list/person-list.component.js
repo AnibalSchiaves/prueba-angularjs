@@ -1,25 +1,28 @@
-angular.module('personListModule', []);
+angular.module('personListModule', ['personUtils']);
 
 angular.module('personListModule')
     .component('personList', {
         templateUrl: 'person-list/person-list.template.html',
-        controller: ['$http', 
-            function PersonListController($http) {
+        controller: ['$http', 'personUtils', 
+            function PersonListController($http, personUtils) {
                 this.personas = [];
-
+                var ctrl = this;
                 $http.get("person-list/data.json").then((response) => {
-                    this.personas = response.data;
+                    let personas = response.data;
+                    angular.forEach(personas, function(persona, i) {
+                        let personaObj = {};
+                        personaObj.nombre = persona;
+                        personaObj.id = personUtils.formatAsId(persona);
+                        personaObj.img = personUtils.formatAsImg(persona);
+                        ctrl.personas.push(personaObj);
+                    })
                 });
 
-                this.sort = "toString()";
+                this.sort = "nombre";
 
-                this.formatAsImg = function(nombre) {
-                    return "img/"+nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase()+".jpeg";
-                }
+                this.formatAsImg = personUtils.formatAsImg;
 
-                this.formatAsId = function(nombre) {
-                    return nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase();
-                }
+                this.formatAsId = personUtils.formatAsId;
             }
         ]
     })

@@ -3,14 +3,14 @@
     <div>
         <input ng-model="$ctrl.query" type="text" placeholder="buscar...">
         <select ng-model="$ctrl.sort">
-            <option value="toString()">Ascendente</option>
-            <option value="-toString()">Descendente</option>
+            <option value="nombre">Ascendente</option>
+            <option value="-nombre">Descendente</option>
         </select>
         <ul>
             <li ng-repeat="person in $ctrl.personas | filter:$ctrl.query | orderBy:$ctrl.sort">
-                <a href="#!/personas/{{$ctrl.formatAsId(person)}}">
+                <a href="#!/personas/{{person.id}}">
                     <h4>
-                        <img ng-src="{{$ctrl.formatAsImg(person)}}" height="40px"/> {{person}}
+                        <img ng-src="{{person.img}}" height="40px"/> {{person.nombre}}
                     </h4>
                 </a>
             </li>
