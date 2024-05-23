@@ -8,9 +8,9 @@
         </select>
         <ul>
             <li ng-repeat="person in $ctrl.personas | filter:$ctrl.query | orderBy:$ctrl.sort">
-                <a href="#!/personas/{{person.id}}">
+                <a href="#!/personas/{{person.nombre | personid}}">
                     <h4>
-                        <img ng-src="{{person.img}}" height="40px"/> {{person.nombre}}
+                        <img ng-src="{{person.nombre | personimg}}" height="40px"/> {{person.nombre}}
                     </h4>
                 </a>
             </li>

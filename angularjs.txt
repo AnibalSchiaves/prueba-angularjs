@@ -342,3 +342,45 @@ Tercero, reescribimos el tag 'img' para hacer uso de la nueva propiedad 'img' y 
 	...
 
 ------- hasta aquí incluido en commit "service" -------
+
+- declarar un filter -> un filter son funciones que nos permite definir angularjs para ser usadas en los binding que definimos en un template. La notación es:
+
+	{{expresion | filter}}
+
+Donde 'filter' es el nombre del filter que definimos.
+
+En nuestro ejemplo podriamos haber creado dos filter para las funciones que convierten el nombre de una persona en su id o en el path de su imagen. Vamos entonces a crear un nuevo archivo dentro de person-utils al que llamaremos person-util.filter.js y allí crearemos ambos filters, el ćodigo quedaría:
+
+	angular.module('personUtils')
+		.filter('personid', function() {
+			return function(nombre) {
+				return nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase();
+			}
+		})
+		.filter('personimg', function() {
+			return function(nombre) {
+				return "img/"+nombre.replace(/ /g, "").normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase()+".jpeg";
+			}
+		});
+
+Luego agregamos el nuevo script a index.html
+
+	...
+	<script src="person-utils/person-utils.filter.js"></script>
+	...
+
+Ahora vamos a modificar los templates para usar los filter, empezamos con person-list.template.html en el cual hacemos el remplazo del anchor y del tag img por los siguientes:
+
+	...
+	<a href="#!/personas/{{person.nombre | personid}}">
+	...
+			<img ng-src="{{person.nombre | personimg}}" height="40px"/> {{person.nombre}}
+	...
+
+Y terminamos modificando person-detail.template.html cambiando el tag 'img' por el siguiente:
+
+	...
+	<img ng-src="{{$ctrl.persona.nombre | personimg}}" />
+	...
+
+------- hasta aquí incluido en commit "filter" -------
